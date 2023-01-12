@@ -9,6 +9,7 @@ use App\Models\Enemy;
 use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class GameController extends Controller
 {
@@ -107,6 +108,12 @@ class GameController extends Controller
 
         $this->player->move($request->key);
 
+        foreach ($this->enemies as $enemy) {
+            if ($this->player->isCollidingWith($enemy)) {
+                return static::abortAndGameOver();
+            }
+        }
+
         $this->enemies->each(function (Enemy $enemy) {
             $enemy->moveRandomDirection();
         });
@@ -129,4 +136,17 @@ class GameController extends Controller
         return view('game');
     }
 
+    /**
+     * abortAndGameOver function
+     *
+     * @return void
+     */
+    public static function abortAndGameOver()
+    {
+        throw new HttpResponseException(
+            redirect(
+                route('gameover')
+            )
+        );
+    }
 }

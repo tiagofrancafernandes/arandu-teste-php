@@ -19,8 +19,9 @@ Route::get('/', [\App\Http\Controllers\GameController::class, 'scene'])->name('g
 Route::post('/move', [\App\Http\Controllers\GameController::class, 'update'])->name('move');
 
 Route::get('/gameover', function () {
-
-    session()->flush();
+    session([
+        'score' => 0,
+    ]);
 
     return view('gameover');
 })->name('gameover');
