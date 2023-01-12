@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\Constants\Movement;
+
 abstract class GameObject
 {
     private $_x;
@@ -53,19 +55,19 @@ abstract class GameObject
     public function move($direction)
     {
         switch ($direction) {
-            case 'ArrowUp':
+            case Movement::ARROW_UP:
                 $this->_y--;
                 break;
 
-            case 'ArrowDown':
+            case Movement::ARROW_DOWN:
                 $this->_y++;
                 break;
 
-            case 'ArrowLeft':
+            case Movement::ARROW_LEFT:
                 $this->_x--;
                 break;
 
-            case 'ArrowRight':
+            case Movement::ARROW_RIGHT:
                 $this->_x++;
                 break;
 
