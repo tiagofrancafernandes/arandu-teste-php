@@ -61,7 +61,6 @@ class Enemy extends GameObject
 
     public function render()
     {
-
         $css = "
         .tile-{$this->x()}-{$this->y()} {
             background-color: blue;
@@ -69,7 +68,6 @@ class Enemy extends GameObject
         ";
 
         echo $css;
-
     }
 
     /**

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\LimitMode;
 use App\Constants\Map;
+use App\Constants\Movement;
 use App\Models\Enemy;
 use App\Models\Player;
 use Illuminate\Http\Request;
@@ -12,6 +14,7 @@ class GameController extends Controller
 {
 
     public $score = 0;
+    public $limitMode = \null;
 
     /** @var Player */
     public $player;
@@ -27,10 +30,11 @@ class GameController extends Controller
      */
     public function load()
     {
-
         // Instancia o jogador a partir da sessão, se a
         // sessão não existir, cria um novo jogador no
         // quadrado central
+
+        /** @var Player */
         $this->player = session(
             'player',
             new Player(
@@ -39,8 +43,8 @@ class GameController extends Controller
             )
         );
 
-        // Instancia os inimigos a partir da seessão, se
-        // a sessão não existir, gera uma coleção de
+        // Instancia os inimigos a partir da seessão,
+        // se a sessão não existir, gera uma coleção de
         // inimigos
         $this->enemies = session(
             'enemies',
@@ -52,6 +56,7 @@ class GameController extends Controller
             0
         );
 
+        $this->limitMode = $this->player->getLimitMode();
     }
 
     /**
@@ -65,6 +70,7 @@ class GameController extends Controller
             'player' => $this->player,
             'enemies' => $this->enemies,
             'score' => $this->score,
+            'limit_mode' => $this->limitMode,
         ]);
     }
 
@@ -77,9 +83,29 @@ class GameController extends Controller
      */
     public function update(Request $request)
     {
+        if (!\in_array(
+            $request->key,
+            [
+                Movement::ARROW_UP,
+                Movement::ARROW_DOWN,
+                Movement::ARROW_LEFT,
+                Movement::ARROW_RIGHT,
+            ],
+            true
+        )) {
+            return;
+        }
+
         $this->load();
 
         $this->player->move($request->key);
+
+        if (
+            $request->limit_mode &&
+            \is_string($request->limit_mode)
+        ) {
+            $this->player->setLimitMode($request->limit_mode);
+        }
 
         $this->enemies->each(function (Enemy $enemy) {
             $enemy->moveRandomDirection();

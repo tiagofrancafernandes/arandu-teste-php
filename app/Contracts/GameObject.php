@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\Constants\LimitMode;
+use App\Constants\Map;
 use App\Constants\Movement;
 
 abstract class GameObject
@@ -56,25 +58,70 @@ abstract class GameObject
     {
         switch ($direction) {
             case Movement::ARROW_UP:
-                $this->_y--;
+                $this->decrement('_y');
                 break;
 
             case Movement::ARROW_DOWN:
-                $this->_y++;
+                $this->increment('_y');
                 break;
 
             case Movement::ARROW_LEFT:
-                $this->_x--;
+                $this->decrement('_x');
                 break;
 
             case Movement::ARROW_RIGHT:
-                $this->_x++;
+                $this->increment('_x');
                 break;
 
             default:
                 # code...
                 break;
         }
+    }
+
+    /**
+     * function increment
+     *
+     * @param string $key
+     * @return void
+     */
+    public function increment(string $key): void
+    {
+        $currentValue = $this->{$key};
+        if ($currentValue < 32) {
+            $this->{$key}++;
+            return;
+        }
+
+        $resetX = $this->getLimitMode() == LimitMode::COLIDIR ? (Map::WIDTH - 1) : 0;
+        $resetY = $this->getLimitMode() == LimitMode::COLIDIR ? (Map::HEIGHT - 1) : 0;
+
+        $newX = $key === '_x' ? $resetX : $this->x();
+        $newY = $key === '_y' ? $resetY : $this->y();
+        $this->moveTo($newX, $newY);
+    }
+
+    /**
+     * function decrement
+     *
+     * @param string $key
+     * @return void
+     */
+    public function decrement(string $key): void
+    {
+        $currentValue = $this->{$key};
+        if ($currentValue > 0) {
+            $this->{$key}--;
+
+            return;
+        }
+
+        $resetX = $this->getLimitMode() == LimitMode::COLIDIR ? 0 : (Map::WIDTH - 1);
+        $resetY = $this->getLimitMode() == LimitMode::COLIDIR ? 0 : (Map::HEIGHT - 1);
+
+        $newX = $key === '_x' ? $resetX : $this->x();
+        $newY = $key === '_y' ? $resetY : $this->y();
+        $this->moveTo($newX, $newY);
     }
 
     /**
@@ -96,4 +143,42 @@ abstract class GameObject
      * @return void
      */
     abstract function render();
+
+    /**
+     * function setLimitMode
+     *
+     * @param string $limitMode
+     *
+     * @return void
+     */
+    public function setLimitMode(string $limitMode): void
+    {
+        if (!\in_array(
+            $limitMode,
+            [
+                LimitMode::COLIDIR,
+                LimitMode::TELETRANSPORTE,
+            ],
+            true
+        )) {
+            return;
+        }
+
+        session([
+            'limit_mode' => $limitMode,
+        ]);
+    }
+
+    /**
+     * function getLimitMode
+     *
+     * @return string
+     */
+    public function getLimitMode(): string
+    {
+        return session(
+            'limit_mode',
+            LimitMode::TELETRANSPORTE
+        );
+    }
 }
