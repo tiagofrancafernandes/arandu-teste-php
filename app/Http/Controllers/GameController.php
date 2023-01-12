@@ -83,7 +83,16 @@ class GameController extends Controller
      */
     public function update(Request $request)
     {
-        if (!\in_array(
+        $this->load();
+
+        if (
+            $request->limit_mode &&
+            \is_string($request->limit_mode)
+        ) {
+            $this->player->setLimitMode($request->limit_mode);
+        }
+
+        if (!$request->key || !\in_array(
             $request->key,
             [
                 Movement::ARROW_UP,
@@ -96,16 +105,7 @@ class GameController extends Controller
             return;
         }
 
-        $this->load();
-
         $this->player->move($request->key);
-
-        if (
-            $request->limit_mode &&
-            \is_string($request->limit_mode)
-        ) {
-            $this->player->setLimitMode($request->limit_mode);
-        }
 
         $this->enemies->each(function (Enemy $enemy) {
             $enemy->moveRandomDirection();

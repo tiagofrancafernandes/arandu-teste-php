@@ -8,9 +8,11 @@
     <title>Teste Arandu</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
     <!-- Styles -->
     <style>
+        /* https://tiagofranca.com/ */
         /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
         html {
             line-height: 1.15;
@@ -427,21 +429,124 @@ border: rgb(0, 0, 0) 1px solid;
             </tbody>
         </table>
         <p>Pontuação: {{session('score', 0)}}</p>
+
+        <div class="grid grid-rows-1 limit-mode">
+            <h4 style="margin: .5rem auto;">Limit mode:</h4>
+            <div
+                class="
+                    flex
+                    justify-between
+                    mode-selector
+                    {{ session('limit_mode') === 'colidir' ? 'selected' : '' }}
+                "
+                data-limit-mode="colidir"
+            >
+                <label for="limit_mode_colidir">Colidir</label>
+                <input
+                    type="radio"
+                    name="limit_mode"
+                    value="colidir"
+                    id="limit_mode_colidir"
+                    {{ session('limit_mode') === 'colidir' ? 'checked' : '' }}
+                >
+            </div>
+
+            <div
+                class="
+                    flex
+                    justify-between
+                    mode-selector
+                    {{ session('limit_mode') === 'teletransporte' ? 'selected' : '' }}
+                "
+                data-limit-mode="teletransporte"
+            >
+                <label for="limit_mode_teletransporte">
+                    Teletransporte
+                    <input
+                        type="radio"
+                        name="limit_mode"
+                        value="teletransporte"
+                        id="limit_mode_teletransporte"
+                        {{ session('limit_mode') === 'teletransporte' ? 'checked' : '' }}
+                    >
+                </label>
+            </div>
+        </div>
     </div>
 
     <script>
 
+        const sendData = (data, refresh = false) => {
+            let isObject = Object.prototype.toString.call(data) === "[object Object]"
 
-        document.addEventListener('keydown', (e) => {
-            const { key } = e;
+            if (!isObject) {
+                return
+            }
 
             axios({
                 url: '{{ route('move') }}',
                 method: 'POST',
-                data: {
-                    key
+                data: data
+            }).then(() => {
+                if (!refresh) {
+                    return
                 }
-            }).then(() => window.location.reload());
+
+                window.location.reload()
+            });
+        }
+
+        document.querySelectorAll('input[name="limit_mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+
+                const acceptedValue = [
+                    'colidir',
+                    'teletransporte',
+                ].includes(e.target.value)
+
+                if(!acceptedValue) {
+                    return;
+                }
+
+                document.querySelectorAll('[data-limit-mode]').forEach(selector => {
+                    selector.classList.remove('selected')
+                })
+
+                document.querySelectorAll(`[data-limit-mode="${e.target.value}"]`).forEach(selector => {
+                    selector.classList.add('selected')
+                })
+
+                e.preventDefault()
+
+                const payload = {
+                    limit_mode: e.target.value
+                }
+
+                sendData(payload)
+            })
+        })
+
+        document.addEventListener('keydown', (e) => {
+            const { key } = e;
+
+            const acceptedKey = [
+                'ArrowUp',
+                'ArrowDown',
+                'ArrowLeft',
+                'ArrowRight',
+            ].includes(key)
+
+            if(!acceptedKey) {
+                return;
+            }
+
+            e.preventDefault()
+
+            const payload = {
+                key
+            }
+
+            sendData(payload, true)
         });
 
     </script>

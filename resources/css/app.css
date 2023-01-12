@@ -1,0 +1,30 @@
+.limit-mode {
+    padding-bottom: 2rem;
+}
+
+.limit-mode .mode-selector,
+.limit-mode .mode-selector input,
+.limit-mode .mode-selector label {
+    cursor: pointer;
+}
+
+.limit-mode .mode-selector {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 6px;
+    border-radius: 5px;
+    margin-bottom: 0.8rem;
+    box-shadow: #547da3 1px 1px 1px;
+    background: #A0C5E8;
+    user-select: none;
+}
+
+.limit-mode .mode-selector.selected {
+    box-shadow: #547da3 1px 2px 3px;
+    background: #6C96BE;
+}
+
+.limit-mode .mode-selector:hover {
+    box-shadow: #31495f 1px 1px 8px !important;
+}
