@@ -85,6 +85,8 @@ class GameController extends Controller
             $enemy->moveRandomDirection();
         });
 
+        $this->score = $this->score + 10;
+
         $this->writeToSession();
     }
 
